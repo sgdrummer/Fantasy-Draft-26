@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#10352A">
+<title>Fantasy Draft Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800&family=Archivo:wght@400;500;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#E7E0CE;--paper2:#F2EDE0;--slat:#F7F3E8;--board:#10352A;--board2:#0A241C;
+--red:#B3282D;--ink:#1B1A16;--brass:#9A7B3C;--line:rgba(27,26,22,.14)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Archivo',system-ui,sans-serif;color:var(--ink);background:var(--paper);
+background-image:radial-gradient(rgba(27,26,22,.05) 1px,transparent 1px);background-size:4px 4px}
+.wrap{max-width:640px;margin:0 auto;padding-bottom:70px}
+.stamp{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass)}
+.hdr{background:var(--board);color:var(--slat);padding:calc(22px + env(safe-area-inset-top)) 18px 22px;
+border-bottom:4px solid var(--board2)}
+.hdr h1{font-family:'Big Shoulders Display',Impact,sans-serif;font-weight:800;font-size:clamp(32px,10vw,48px);
+line-height:.86;margin:0;text-transform:uppercase;user-select:none;cursor:default}
+.tabs{display:flex;background:var(--board2);position:sticky;top:0;z-index:5}
+.tab{flex:1;background:none;border:0;cursor:pointer;padding:13px 2px;font-family:'Courier Prime',monospace;
+font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:rgba(247,243,232,.5);border-bottom:3px solid transparent}
+.tab.on{color:var(--slat);border-bottom-color:var(--brass)}
+.livebar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(16,53,42,.07);
+border-bottom:1px solid var(--line);font-family:'Courier Prime',monospace;font-size:10px;
+letter-spacing:.08em;text-transform:uppercase;color:rgba(27,26,22,.55)}
+.dot{width:6px;height:6px;border-radius:50%;background:#2E9C63;box-shadow:0 0 0 3px rgba(46,156,99,.18);flex:none}
+.dot.bad{background:var(--red);box-shadow:0 0 0 3px rgba(179,40,45,.18)}
+.dot.idle{background:rgba(27,26,22,.3);box-shadow:none}
+.livebar .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.livebar button{background:none;border:1px solid var(--line);padding:5px 9px;font:inherit;
+color:rgba(27,26,22,.65);flex:none;cursor:pointer}
+.rail{display:flex;border:1px solid var(--line);margin:12px 12px 0}
+.leg{flex:1;padding:9px 7px;text-align:left;background:none;border:0;cursor:pointer;
+border-right:1px solid var(--line);font-family:'Courier Prime',monospace;color:rgba(27,26,22,.45)}
+.leg:last-child{border-right:0}
+.leg b{display:block;font-size:9px;line-height:1.35;letter-spacing:.04em;text-transform:uppercase}
+.leg i{display:block;font-style:normal;font-size:8.5px;margin-top:4px;opacity:.7}
+.leg.done{color:rgba(27,26,22,.7);background:rgba(27,26,22,.05)}
+.leg.now{color:var(--slat);background:var(--board)}
+.evtitle{padding:14px 14px 8px}
+.evtitle b{display:block;font-family:'Big Shoulders Display',sans-serif;font-weight:700;font-size:22px;
+line-height:1.05;text-transform:uppercase;margin-bottom:3px}
+.lrow{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.lrow:nth-child(odd){background:rgba(255,255,255,.36)}
+.lrow.mine{background:rgba(154,123,60,.14);box-shadow:inset 3px 0 0 var(--brass)}
+.lpos{font-family:'Courier Prime',monospace;font-size:11px;width:34px;flex:none;color:rgba(27,26,22,.55)}
+.lmid{flex:1;min-width:0}
+.lname{font-size:14.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
+.lown{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+color:var(--brass);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lthru{font-family:'Courier Prime',monospace;font-size:10px;color:rgba(27,26,22,.4);width:40px;flex:none;text-align:right}
+.lright{width:48px;flex:none;text-align:right}
+.ltot{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:24px;line-height:1;display:block}
+.lpts{font-family:'Courier Prime',monospace;font-size:10px;color:var(--brass);margin-top:5px;display:block}
+.under{color:var(--red)}.over{color:var(--ink)}
+.slat{display:flex;background:var(--slat);border:1px solid var(--line);border-left:0;margin:0 12px 6px;
+box-shadow:0 1px 0 rgba(27,26,22,.1);overflow:hidden}
+.slat.you{background:#FFFDF5;border-color:var(--brass)}
+.snum{background:var(--board);color:var(--slat);width:58px;flex:none;display:flex;flex-direction:column;
+align-items:center;justify-content:center;padding:10px 4px}
+.snum b{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:34px;line-height:.9}
+.snum i{display:block;font-family:'Courier Prime',monospace;font-style:normal;font-size:9px;margin-top:4px;opacity:.85}
+.sbody{flex:1;padding:10px 12px;min-width:0;display:flex;align-items:center;justify-content:space-between;
+gap:10px;background:none;border:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.mgr{font-family:'Big Shoulders Display',sans-serif;font-weight:700;font-size:25px;line-height:1;
+text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.sub{font-family:'Courier Prime',monospace;font-size:10.5px;color:rgba(27,26,22,.6);margin-top:5px;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.pts{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:31px;line-height:1;display:block;text-align:right}
+.mv{font-family:'Courier Prime',monospace;font-size:9.5px;text-align:right;margin-top:3px;display:block;
+color:rgba(27,26,22,.45);text-transform:uppercase}
+.up{color:#1F7A4C}.down{color:var(--red)}
+.roster{margin:-6px 12px 8px;background:var(--paper2);border:1px solid var(--line);border-top:0;padding:8px 12px 10px}
+.rline{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px dotted var(--line)}
+.rline:last-child{border-bottom:0}
+.rleg{font-family:'Courier Prime',monospace;font-size:10px;text-transform:uppercase;color:rgba(27,26,22,.5);flex:1;min-width:0}
+.rpos{font-family:'Courier Prime',monospace;font-size:11px;width:36px;flex:none;color:rgba(27,26,22,.5)}
+.rname{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rpts{font-family:'Big Shoulders Display',sans-serif;font-weight:700;font-size:18px;width:40px;text-align:right;flex:none}
+.hero{background:var(--board);color:var(--slat);margin:12px;padding:16px 18px}
+.hero .stamp{color:rgba(247,243,232,.5)}
+.hero .pick{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:62px;line-height:.85;margin:4px 0}
+.hero .who{font-family:'Courier Prime',monospace;font-size:11.5px;color:rgba(247,243,232,.75);line-height:1.7}
+.chase{margin:0 12px 12px;padding:11px 14px;background:var(--paper2);border:1px solid var(--line);
+font-size:13px;line-height:1.55;color:rgba(27,26,22,.72)}
+.card{background:var(--paper2);border:1px solid var(--line);margin:12px;padding:14px}
+.lab{display:block;font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:.14em;
+text-transform:uppercase;color:rgba(27,26,22,.55);margin-bottom:6px}
+select,textarea{width:100%;padding:10px;border:1px solid var(--line);background:#fff;
+font-family:'Courier Prime',monospace;font-size:14px;color:var(--ink);border-radius:0;-webkit-appearance:none}
+.btn{display:flex;align-items:center;justify-content:center;background:var(--board);color:var(--slat);
+border:0;padding:12px 16px;cursor:pointer;font-family:'Courier Prime',monospace;font-size:11.5px;
+letter-spacing:.1em;text-transform:uppercase;width:100%}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.rule{font-size:13px;line-height:1.65;color:rgba(27,26,22,.72)}
+.ptable{font-family:'Courier Prime',monospace;font-size:11.5px;line-height:1.85;color:rgba(27,26,22,.62);margin-top:8px}
+.deal{font-family:'Courier Prime',monospace;font-size:11.5px;line-height:1.7;color:rgba(27,26,22,.66);margin-top:8px}
+.deal b{display:block;color:var(--ink);letter-spacing:.08em;text-transform:uppercase;font-size:10px;margin:10px 0 2px}
+.code{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:28px;letter-spacing:.06em}
+.err{background:#F7E4E4;border:1px solid var(--red);color:#7A1D21;padding:10px 12px;margin:12px;font-size:13px;line-height:1.5}
+.empty{text-align:center;padding:44px 24px;color:rgba(27,26,22,.55);font-size:14px;line-height:1.6}
+.hide{display:none}
+@keyframes flip{from{transform:translateY(-14px) scaleY(.86);opacity:.25}to{transform:none;opacity:1}}
+.moved{animation:flip .42s cubic-bezier(.2,.9,.3,1) both}
+@media (prefers-reduced-motion:reduce){.moved{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hdr"><h1 id="title">Fantasy<br>Draft Order</h1></header>
+  <nav class="tabs" id="tabs"></nav>
+  <div id="livebar"></div>
+  <div id="err"></div>
+  <main id="view"></main>
+</div>
+
+<script>
+/* ==================================================================== */
+/*  SWAP THESE TWO LINES WHEN THE REAL NAMES COME IN.                   */
+/* ==================================================================== */
+const MANAGERS = ["Ryan","Tyler","Marcus","Danny","Pete","Wes","Carla","Ash","Owen","Gabe"];
+const DRAW_CODE = "K7QM-3RXP";
+/* ==================================================================== */
+
+const EVENTS = [
+  { id:"sjc", espn:"401811962", name:"FedEx St. Jude Championship", venue:"TPC Southwind, Memphis", dates:"Aug 13–16", size:69, mult:1,   opens:"2026-08-13" },
+  { id:"bmw", espn:"401811963", name:"BMW Championship",            venue:"Bellerive Country Club, St. Louis", dates:"Aug 20–23", size:50, mult:1.5, opens:"2026-08-20" },
+  { id:"tc",  espn:"401811964", name:"TOUR Championship",           venue:"East Lake Golf Club, Atlanta", dates:"Aug 27–30", size:30, mult:2,   opens:"2026-08-27" },
+];
+const EV = Object.fromEntries(EVENTS.map(e=>[e.id,e]));
+
+const SJC_FIELD = ["Scottie Scheffler","Matt Fitzpatrick","Cameron Young","Wyndham Clark","Chris Gotterup","Collin Morikawa","Si Woo Kim","Sam Burns","Tommy Fleetwood","Ludvig Åberg","Xander Schauffele","Rory McIlroy","Jacob Bridgeman","Akshay Bhatia","Russell Henley","Ryan Gerard","Min Woo Lee","Kristoffer Reitan","Alex Fitzpatrick","Hideki Matsuyama","J.J. Spaun","Ryan Fox","Viktor Hovland","Justin Rose","Alex Smalley","Tom Kim","Gary Woodland","Rickie Fowler","Adam Scott","J.T. Poston","Robert MacIntyre","Nicolai Højgaard","Kurt Kitayama","Bud Cauley","Aaron Rai","Ben Griffin","Sepp Straka","Michael Thorbjornsen","Justin Thomas","Jake Knapp","Nico Echavarria","Patrick Cantlay","Ryo Hisatsune","Sahith Theegala","Eric Cole","Alex Noren","Michael Brennan","Matt McCarty","Keith Mitchell","Maverick McNealy","Harris English","Max Homa","Sungjae Im","Jordan Spieth","Sam Stevens","Pierceson Coody","Sudarshan Yellamaraju","Harry Hall","Corey Conners","Michael Kim","Shane Lowry","Nick Taylor","Jordan Smith","Brian Harman","Patrick Rodgers","Aldrich Potgieter","Ricky Castillo","Matti Schmid","Jackson Koivun"];
+
+/* ------------------------- the draw, derived ----------------------- */
+function hashSeed(str){let h=1779033703^str.length;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=(h<<13)|(h>>>19);}
+return()=>{h=Math.imul(h^(h>>>16),2246822507);h=Math.imul(h^(h>>>13),3266489909);return((h^=h>>>16)>>>0)/4294967296;};}
+function shuffle(arr,seed){const r=hashSeed(seed),a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function snake(players,mgrs){const out={};mgrs.forEach(m=>out[m]=[]);let i=0,rd=0;
+while(i<players.length){const seq=rd%2===0?mgrs:[...mgrs].reverse();for(const m of seq){if(i>=players.length)break;out[m].push(players[i++]);}rd++;}return out;}
+
+const PER_MANAGER = Math.floor(SJC_FIELD.length / MANAGERS.length);
+const DEALT = SJC_FIELD.slice(0, PER_MANAGER * MANAGERS.length);
+const UNDEALT = SJC_FIELD.length - DEALT.length;
+const TIEBREAK = shuffle(MANAGERS, DRAW_CODE + "|tie");
+/* Written nowhere. Recomputed identically on every device, every load. */
+const ROSTER = snake(DEALT, shuffle(MANAGERS, DRAW_CODE + "|m"));
+
+const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z]/g,"");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = v => (v===null||v===undefined)?"–":v===0?"E":v>0?("+"+v):(""+v);
+const cls = v => (typeof v==="number" && v<0)?"under":"over";
+
+/* ------------------------------ points ----------------------------- */
+const TOP10=[100,60,45,38,33,29,26,24,22,20];
+const posPts = p => !p?0:(p<=10?TOP10[p-1]:Math.max(1,20*Math.pow(0.93,p-10)));
+function tiePts(rank,n,mult){let s=0;for(let i=0;i<n;i++)s+=posPts(rank+i);return Math.round(s/n*mult);}
+
+/* --------------------------- data fetching -------------------------- */
+const espnUrl = id => `https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard?event=${EV[id].espn}`;
+const ROUTES = [
+  {id:"direct",     build:u=>u},
+  {id:"allorigins", build:u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`},
+  {id:"codetabs",   build:u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`},
+  {id:"corsproxy",  build:u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`},
+];
+let preferred = localStorage.getItem("fdo:route") || null;
+let diagnostics = [];
+
+async function grabJson(target){
+  const order = preferred ? [...ROUTES.filter(r=>r.id===preferred), ...ROUTES.filter(r=>r.id!==preferred)] : ROUTES;
+  const notes=[];
+  for(const route of order){
+    try{
+      const res = await fetch(route.build(target), {headers:{Accept:"application/json"}});
+      if(!res.ok){notes.push({id:route.id,ok:false,msg:"HTTP "+res.status});continue;}
+      const txt = await res.text();
+      const i = txt.indexOf("{");
+      if(i===-1){notes.push({id:route.id,ok:false,msg:"not JSON"});continue;}
+      const data = JSON.parse(txt.slice(i));
+      notes.push({id:route.id,ok:true,msg:"worked"});
+      preferred = route.id; localStorage.setItem("fdo:route",route.id);
+      diagnostics = notes; return data;
+    }catch(e){ notes.push({id:route.id,ok:false,msg:e.message}); }
+  }
+  diagnostics = notes;
+  throw new Error("couldn't reach the scores feed");
+}
+
+const toPar = s => { if(s==null) return null; const t=String(s).trim(); if(t==="E")return 0;
+  const n=parseInt(t,10); return Number.isFinite(n)?n:null; };
+
+function parseEspn(data, eventId){
+  const e = EV[eventId];
+  const ev = (data.events||[]).find(x=>x.id===e.espn) || (data.events||[])[0];
+  if(!ev) throw new Error("no event data");
+  const comp = (ev.competitions||[])[0];
+  if(!comp) throw new Error("no leaderboard yet");
+  const st = ev.status || comp.status || {};
+  const players={};
+  for(const c of comp.competitors||[]){
+    const name = c.athlete?.displayName || c.athlete?.fullName;
+    if(!name) continue;
+    const total = toPar(c.score);
+    const rounds = (c.linescores||[]).filter(l=>Array.isArray(l.linescores)&&l.linescores.length);
+    const last = rounds[rounds.length-1];
+    const holes = last ? last.linescores.length : 0;
+    let birdies=0;
+    for(const l of c.linescores||[]){
+      const v=l.statistics?.categories?.[0]?.stats?.[0]?.value;
+      if(typeof v==="number") birdies+=v;
+    }
+    const state=(c.status?.type?.description||c.status?.type?.name||"").toUpperCase();
+    const outNow = total===null || state.includes("WITHDRAW") || state.includes("DISQUAL");
+    players[norm(name)]={name,total:outNow?null:total,thru:holes>=18?"F":(holes?String(holes):null),birdies,out:outNow};
+  }
+  if(!Object.keys(players).length) throw new Error("empty leaderboard");
+  return {
+    eventId, players,
+    field: (comp.competitors||[]).map(c=>c.athlete?.displayName||c.athlete?.fullName).filter(Boolean),
+    round: st.type?.detail || st.type?.shortDetail || "",
+    status: st.type?.description || "",
+    final: !!st.type?.completed,
+    updatedAt: Date.now(),
+  };
+}
+
+/* --------------------------- board building ------------------------ */
+function lineup(eventId, manager, results){
+  const field = results[eventId]?.field;
+  if(!field) return [];
+  const set = new Set(field.map(norm));
+  return (ROSTER[manager]||[]).filter(p=>set.has(norm(p)));
+}
+
+function buildBoard(eventId, results){
+  const r = results[eventId];
+  if(!r) return [];
+  const owner={};
+  for(const m of MANAGERS) for(const p of lineup(eventId,m,results)) owner[norm(p)]=m;
+  const mult = EV[eventId].mult;
+  const rows = r.field.map(name=>{
+    const s = r.players[norm(name)] || {};
+    return {name, owner: owner[norm(name)]||"—", total: s.out?null:(typeof s.total==="number"?s.total:null),
+            thru:s.thru??null, birdies:s.birdies||0, out:!!s.out};
+  });
+  rows.sort((a,b)=>{
+    if(a.out!==b.out) return a.out?1:-1;
+    if(a.total===null&&b.total===null) return a.name.localeCompare(b.name);
+    if(a.total===null) return 1;
+    if(b.total===null) return -1;
+    if(a.total!==b.total) return a.total-b.total;
+    return a.name.localeCompare(b.name);
+  });
+  let last=null,lastPos=0;
+  rows.forEach((row,i)=>{
+    if(row.out||row.total===null){row.pos=row.out?"WD":"—";row.rank=null;row.pts=0;return;}
+    if(row.total!==last){lastPos=i+1;last=row.total;}
+    const n = rows.filter(x=>!x.out&&x.total===row.total).length;
+    row.pos=(n>1?"T":"")+lastPos; row.rank=lastPos; row.pts=tiePts(lastPos,n,mult);
+  });
+  return rows;
+}
+
+function standings(boards, results){
+  const tb = Object.fromEntries(TIEBREAK.map((m,i)=>[m,i]));
+  const rows = MANAGERS.map(m=>{
+    const legs={}; let total=0, birdies=0;
+    for(const e of EVENTS){
+      const b=boards[e.id];
+      if(!b){legs[e.id]=null;continue;}
+      const mine=b.filter(r=>r.owner===m);
+      const pts=mine.reduce((t,r)=>t+r.pts,0);
+      birdies += mine.reduce((t,r)=>t+(r.birdies||0),0);
+      legs[e.id]={pts,count:mine.length}; total+=pts;
+    }
+    return {manager:m, legs, total, birdies,
+            atTC:lineup("tc",m,results).length, atBMW:lineup("bmw",m,results).length};
+  });
+  rows.sort((a,b)=>{
+    if(b.total!==a.total) return b.total-a.total;
+    if(b.atTC!==a.atTC) return b.atTC-a.atTC;
+    if(b.atBMW!==a.atBMW) return b.atBMW-a.atBMW;
+    if(b.birdies!==a.birdies) return b.birdies-a.birdies;
+    return tb[a.manager]-tb[b.manager];
+  });
+  rows.forEach((r,i)=>{
+    const near = rows[i-1]?.total===r.total?rows[i-1]:(rows[i+1]?.total===r.total?rows[i+1]:null);
+    if(!near){r.brokenBy=null;return;}
+    if(r.atTC!==near.atTC) r.brokenBy="tc";
+    else if(r.atBMW!==near.atBMW) r.brokenBy="bmw";
+    else if(r.birdies!==near.birdies) r.brokenBy="birdies";
+    else r.brokenBy="order";
+  });
+  return rows;
+}
+
+/* ------------------------------- state ----------------------------- */
+const S = {
+  tab: "order",
+  me: localStorage.getItem("fdo:me") || "",
+  results: {},
+  boards: {},
+  rows: [],
+  current: "sjc",
+  view: "sjc",
+  loading: true,
+  busy: false,
+  error: "",
+  auto: true,
+  tools: false,
+  open: null,
+  prevOrder: [],
+  prevTotals: {},
+  delta: {},
+  taps: 0,
+};
+
+/* Completed events are cached so we don't refetch settled results. */
+function cacheGet(id){ try{ const v=localStorage.getItem("fdo:res:"+id); return v?JSON.parse(v):null; }catch{ return null; } }
+function cacheSet(id,r){ try{ localStorage.setItem("fdo:res:"+id, JSON.stringify(r)); }catch{} }
+
+async function loadAll(){
+  S.busy=true; S.error=""; render();
+  const today = new Date().toISOString().slice(0,10);
+  let anyFail=null;
+
+  for(const e of EVENTS){
+    if(e.opens > today) continue;             // hasn't begun
+    const cached = cacheGet(e.id);
+    if(cached && cached.final){ S.results[e.id]=cached; continue; }
+    try{
+      const r = parseEspn(await grabJson(espnUrl(e.id)), e.id);
+      S.results[e.id]=r;
+      if(r.final) cacheSet(e.id,r);
+    }catch(err){
+      if(cached) S.results[e.id]=cached;
+      else anyFail = err.message;
+    }
+  }
+
+  const started = EVENTS.filter(e=>S.results[e.id]);
+  S.current = started.length ? started[started.length-1].id : "sjc";
+  if(!S.viewTouched) S.view = S.current;
+
+  S.boards={};
+  for(const e of EVENTS) if(S.results[e.id]) S.boards[e.id]=buildBoard(e.id,S.results);
+
+  const rows = standings(S.boards, S.results);
+  const now = Object.fromEntries(rows.map(r=>[r.manager,r.total]));
+  if(Object.keys(S.prevTotals).length){
+    const d={};
+    for(const m in now){ const w=S.prevTotals[m]; if(typeof w==="number"&&now[m]!==w) d[m]=now[m]-w; }
+    S.delta=d;
+  }
+  S.prevTotals=now;
+  S.rows=rows;
+  S.error = anyFail ? ("Live scores didn't load — "+anyFail+".") : "";
+  S.loading=false; S.busy=false;
+  render();
+}
+
+/* ------------------------------ rendering -------------------------- */
+const $ = id => document.getElementById(id);
+
+function renderTabs(){
+  $("tabs").innerHTML = [["order","Draft order"],["live","Leaderboard"],["team","My team"],["rules","Rules"]]
+    .map(([k,l])=>`<button class="tab${S.tab===k?" on":""}" data-tab="${k}">${l}</button>`).join("");
+}
+
+function renderLivebar(){
+  const r = S.results[S.current];
+  const t = r ? new Date(r.updatedAt).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}) : null;
+  $("livebar").innerHTML = `<div class="livebar">
+    <span class="dot${S.error?" bad":(S.auto?"":" idle")}"></span>
+    <span class="grow">${S.busy?"Updating…":(t?`${S.auto?"Auto":"Paused"} · ${t}`:"No scores yet")}</span>
+    <button data-act="refresh">Refresh</button>
+    <button data-act="auto">${S.auto?"Pause":"Resume"}</button></div>`;
+  $("err").innerHTML = S.error ? `<div class="err">${esc(S.error)}</div>` : "";
+}
+
+function orderView(){
+  if(S.loading) return `<div class="empty">Loading the board…</div>`;
+  let h = `<div class="evtitle"><span class="stamp" style="color:rgba(27,26,22,.45)">If it all ended right now · tap a row for the breakdown</span></div>`;
+  S.rows.forEach((r,i)=>{
+    const was = S.prevOrder.indexOf(r.manager);
+    const d = (was===-1||was===i)?0:was-i;
+    const sw = S.delta[r.manager];
+    const now = r.legs[S.current];
+    const sub = r.brokenBy==="tc" ? `Tied · ${r.atTC} at East Lake`
+      : r.brokenBy==="bmw" ? `Tied · ${r.atBMW} at the BMW`
+      : r.brokenBy==="birdies" ? `Tied · ${r.birdies} birdies`
+      : r.brokenBy==="order" ? "Tied · drawn order"
+      : now ? `${now.count} in the field · ${now.pts} this week` : "awaiting scores";
+    h += `<div><div class="slat${r.manager===S.me?" you":""}">
+      <div class="snum"><b>${i+1}</b>${d?`<i class="${d>0?"up":"down"}">${d>0?"▲"+d:"▼"+(-d)}</i>`:""}</div>
+      <button class="sbody" data-open="${esc(r.manager)}">
+        <span style="min-width:0"><span class="mgr">${esc(r.manager)}</span><span class="sub">${esc(sub)}</span></span>
+        <span><span class="pts">${r.total}</span>
+        <span class="mv ${sw>0?"up":sw<0?"down":""}">${sw?(sw>0?"+"+sw:sw):"pts"}</span></span>
+      </button></div>`;
+    if(S.open===r.manager){
+      h += `<div class="roster">`;
+      for(const e of EVENTS) h += `<div class="rline"><span class="rleg">${e.name}</span><span class="rpts">${r.legs[e.id]?r.legs[e.id].pts:"–"}</span></div>`;
+      for(const g of (S.boards[S.current]||[]).filter(x=>x.owner===r.manager))
+        h += `<div class="rline"><span class="rpos">${g.pos}</span><span class="rname">${esc(g.name)}</span><span class="rpts">${g.pts}</span></div>`;
+      h += `<div class="rline"><span class="rleg">Still alive · BMW / East Lake</span><span class="rpts">${r.atBMW} / ${r.atTC}</span></div>`;
+      h += `<div class="rline"><span class="rleg">Birdies · all events</span><span class="rpts">${r.birdies}</span></div></div>`;
+    }
+    h += `</div>`;
+  });
+  S.prevOrder = S.rows.map(r=>r.manager);
+  h += `<div style="padding:12px"><button class="btn ghost" data-act="copyorder">Copy draft order</button></div>`;
+  return h;
+}
+
+function liveView(){
+  let h = `<div class="rail">` + EVENTS.map(e=>{
+    const st = S.results[e.id]?.final ? "done" : (S.current===e.id ? "now" : "");
+    return `<button class="leg ${st}${S.view===e.id?" done":""}" data-view="${e.id}"><b>${e.name}</b><i>${e.dates}</i></button>`;
+  }).join("") + `</div>`;
+  const ev = EV[S.view], r = S.results[S.view];
+  h += `<div class="evtitle"><b>${ev.name}</b><span class="stamp" style="color:rgba(27,26,22,.45)">${
+    r ? (r.final ? "Final result" : esc(r.round+" · "+r.status)) : ev.venue}</span></div>`;
+  const board = S.boards[S.view];
+  if(!board||!board.length) return h + `<div class="empty">The ${ev.name} hasn't started. Its field is set the Sunday before.</div>`;
+  h += board.map(x=>`<div class="lrow${S.me&&x.owner===S.me?" mine":""}">
+    <span class="lpos">${x.pos}</span>
+    <span class="lmid"><span class="lname">${esc(x.name)}</span><span class="lown">${esc(x.owner)}</span></span>
+    <span class="lthru">${x.thru&&x.thru!=="F"?"thru "+x.thru:(x.thru==="F"?"F":"")}</span>
+    <span class="lright"><span class="ltot ${cls(x.total)}">${fmt(x.total)}</span><span class="lpts">${x.pts} pts</span></span>
+  </div>`).join("");
+  return h;
+}
+
+function teamView(){
+  let h = `<div class="card"><span class="lab">Who are you?</span>
+    <select id="mesel"><option value="">Pick your name</option>${
+      MANAGERS.map(m=>`<option value="${esc(m)}"${S.me===m?" selected":""}>${esc(m)}</option>`).join("")}</select></div>`;
+  if(!S.me) return h;
+  const i = S.rows.findIndex(r=>r.manager===S.me);
+  if(i<0) return h;
+  const me = S.rows[i], ahead = i>0?S.rows[i-1]:null;
+  h += `<div class="hero"><div class="stamp">Your pick if it ended right now</div>
+    <div class="pick">${i+1}</div><div class="who">${me.total} points total<br>
+    ${me.legs[S.current]?.pts??0} from the ${EV[S.current].name}
+    ${S.current!=="sjc"?`<br>${me.atBMW} reached the BMW · ${me.atTC} reached East Lake`:""}</div></div>`;
+  if(ahead) h += `<div class="chase"><b>${esc(ahead.manager)}</b> is one spot ahead on ${ahead.total} points. You're ${ahead.total-me.total} back.</div>`;
+  h += `<div class="evtitle"><span class="stamp" style="color:rgba(27,26,22,.45)">Your golfers</span><b>${EV[S.current].name}</b></div>`;
+  const mine = (S.boards[S.current]||[]).filter(x=>x.owner===S.me);
+  if(!mine.length) h += `<div class="empty">None of your golfers are in this field.</div>`;
+  h += mine.map(x=>`<div class="lrow"><span class="lpos">${x.pos}</span>
+    <span class="lmid"><span class="lname">${esc(x.name)}</span></span>
+    <span class="lthru">${x.thru&&x.thru!=="F"?"thru "+x.thru:(x.thru==="F"?"F":"")}</span>
+    <span class="lright"><span class="ltot ${cls(x.total)}">${fmt(x.total)}</span><span class="lpts">${x.pts} pts</span></span></div>`).join("");
+  const gone = ROSTER[S.me].filter(p=>!mine.some(x=>x.name===p));
+  if(gone.length) h += `<div class="card"><span class="lab">Knocked out</span>
+    <div class="deal">${gone.map(p=>`<div>${esc(p)}</div>`).join("")}</div>
+    <div class="rule" style="margin-top:8px">Still yours, just done playing. Every point they banked stays on your total.</div></div>`;
+  return h;
+}
+
+function rulesView(){
+  let h = `<div class="card"><span class="lab">How you got your golfers</span><div class="rule">
+    Nobody picked. The golfers were dealt out before a ball was struck, which is why you own people you'd never have chosen.
+    <br><br>Everyone got exactly <b>${PER_MANAGER}</b>. The FedEx St. Jude Championship field is ${SJC_FIELD.length} players,
+    which doesn't divide evenly by ${MANAGERS.length}, so the bottom ${UNDEALT} in the FedExCup standings went undealt.
+    They still show on the leaderboard with no owner, and they stay out even if one plays his way into the BMW Championship.
+    <br><br>The rest were lined up in FedExCup standings order — best player first — and dealt in a snake: down the list of
+    managers, then back up, then down again. That's what stops one person ending up with Scheffler, McIlroy and Schauffele.
+    <br><br><b>These teams never change.</b> They're rebuilt from the draw code every time this page loads, by the same
+    method on every phone. There's no database to drift and nothing here can reassign a golfer. The full deal is below.
+    </div><div style="margin-top:14px"><span class="lab">Draw code</span><div class="code">${DRAW_CODE}</div></div>
+    <div class="deal">${MANAGERS.map(m=>`<div><b>${esc(m)}</b>${ROSTER[m].map(p=>`<div>${esc(p)}</div>`).join("")}</div>`).join("")}</div>
+    <div style="margin-top:12px"><button class="btn ghost" data-act="copyteams">Copy the whole deal</button></div></div>`;
+
+  h += `<div class="card"><span class="lab">How points work</span><div class="rule">
+    Every golfer you own earns points based on where they sit. Not just your best one — all of them. Your score is your
+    whole roster added together, and it carries across all three tournaments.
+    <br><br>Points are live, calculated off the leaderboard as it stands right now, so a golfer climbing from T31 to T12
+    moves your total while he's still on the course.</div>
+    <div class="ptable"><div style="color:rgba(27,26,22,.42)">BASE POINTS BY FINISH</div>
+    <div>1st 100 · 2nd 60 · 3rd 45 · 4th 38 · 5th 33</div><div>10th 20 · 20th 10 · 30th 5 · 50th 1</div>
+    <div style="margin-top:6px">Ties split the places evenly, same as prize money.</div></div></div>`;
+
+  h += `<div class="card"><span class="lab">The multiplier</span><div class="rule">
+    Points are multiplied by the event: <b>×1</b> at the FedEx St. Jude Championship, <b>×1.5</b> at the BMW Championship,
+    <b>×2</b> at the TOUR Championship.<br><br>This isn't correcting for anything — the three fields are worth about the
+    same on their own, because a smaller field means better average finishes. It's there on purpose, so the thing gets
+    decided in Atlanta rather than by whoever got hot on a Thursday in Memphis.</div></div>`;
+
+  h += `<div class="card"><span class="lab">Moving between tournaments</span><div class="rule">
+    The top 50 after Memphis go to the BMW Championship, and the top 30 after that go to East Lake.
+    <br><br>Whichever of your golfers advance keep playing for you. The ones who don't stop earning, but every point they
+    banked stays on your total. If none make it through you're not eliminated, you just stop adding. Rosters get uneven as
+    the weeks go on, and that's the point: how many of your golfers are still standing is what this rewards.
+    <br><br>Golfers who went undealt at the start never enter play, even if they advance.</div></div>`;
+
+  h += `<div class="card"><span class="lab">Tiebreaks</span><div class="rule">
+    Level on points? <b>Whoever got more golfers the furthest wins.</b> Count how many made the TOUR Championship, then
+    how many made the BMW Championship.<br><br>Still tied? <b>Most birdies</b>, across all three tournaments, counted
+    automatically off the scorecards. The drawn order below only matters if birdies come out level too.</div>
+    <div class="ptable"><div style="color:rgba(27,26,22,.42)">DRAWN ORDER · LAST RESORT ONLY</div>
+    ${TIEBREAK.map((m,i)=>`<div>${i+1}. ${esc(m)}</div>`).join("")}</div></div>`;
+
+  h += `<div class="card"><span class="lab">Things you cannot do</span><div class="rule">
+    No trades, no waivers, no lineups, no benching. You were handed a set of golfers and three weeks of tournament golf
+    decides the rest. Complaining is permitted and encouraged.</div></div>`;
+
+  if(S.tools){
+    h += `<div class="card"><span class="lab">Commissioner</span>
+      <div class="rule" style="margin-bottom:10px">The board reads straight off the live leaderboards and moves itself
+      between tournaments. Nothing here needs doing in normal use.</div>
+      <button class="btn ghost" data-act="clearcache">Clear cached results</button>
+      ${diagnostics.length?`<div style="margin-top:14px"><span class="lab">Score routes</span><div class="ptable">${
+        diagnostics.map(d=>`<div style="color:${d.ok?"#1F7A4C":"rgba(27,26,22,.5)"}">${d.ok?"✓":"✗"} ${d.id} — ${esc(d.msg)}</div>`).join("")
+      }</div></div>`:""}</div>`;
+  }
+  return h;
+}
+
+function render(){
+  renderTabs(); renderLivebar();
+  $("view").innerHTML = S.tab==="order"?orderView():S.tab==="live"?liveView():S.tab==="team"?teamView():rulesView();
+  const sel = $("mesel");
+  if(sel) sel.onchange = e => { S.me=e.target.value; localStorage.setItem("fdo:me",S.me); render(); };
+}
+
+/* ------------------------------ events ----------------------------- */
+document.addEventListener("click", e=>{
+  const tab = e.target.closest("[data-tab]");
+  if(tab){ S.tab=tab.dataset.tab; S.open=null; render(); return; }
+  const view = e.target.closest("[data-view]");
+  if(view){ S.view=view.dataset.view; S.viewTouched=true; render(); return; }
+  const open = e.target.closest("[data-open]");
+  if(open){ S.open = S.open===open.dataset.open?null:open.dataset.open; render(); return; }
+  const act = e.target.closest("[data-act]");
+  if(!act) return;
+  const a = act.dataset.act;
+  if(a==="refresh") loadAll();
+  if(a==="auto"){ S.auto=!S.auto; render(); }
+  if(a==="clearcache"){ EVENTS.forEach(x=>localStorage.removeItem("fdo:res:"+x.id)); loadAll(); }
+  if(a==="copyorder"){
+    const t = `FANTASY DRAFT ORDER\nDraw code ${DRAW_CODE}\n\n` + S.rows.map((r,i)=>`${i+1}. ${r.manager} — ${r.total} pts`).join("\n");
+    navigator.clipboard?.writeText(t); act.textContent="Copied"; setTimeout(()=>act.textContent="Copy draft order",1600);
+  }
+  if(a==="copyteams"){
+    const t = `THE DEAL — draw code ${DRAW_CODE}\n${PER_MANAGER} golfers each\n\n` +
+      MANAGERS.map(m=>`${m}\n  ${ROSTER[m].join("\n  ")}`).join("\n\n");
+    navigator.clipboard?.writeText(t); act.textContent="Copied"; setTimeout(()=>act.textContent="Copy the whole deal",1600);
+  }
+});
+
+$("title").addEventListener("click", ()=>{
+  S.taps++;
+  if(S.taps>=5){ S.taps=0; S.tools=!S.tools; S.tab="rules"; render(); }
+  setTimeout(()=>{S.taps=0;},1500);
+});
+
+render();
+loadAll();
+setInterval(()=>{ if(S.auto && !S.busy && document.visibilityState==="visible") loadAll(); }, 180000);
+</script>
+</body>
+</html>
